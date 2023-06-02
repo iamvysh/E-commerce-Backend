@@ -7,4 +7,5 @@ const router=express.Router()
 router.post("/admin/products",procucts.addProduct)
 
 
+
 module.exports=router

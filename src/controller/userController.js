@@ -2,7 +2,7 @@ const User = require("../model/userSchema");
 const Product=require("../model/productSchema")
 const jwt = require("jsonwebtoken");
 
-
+// user registaration
 
 const registration = async (req, res) => {
   try {
@@ -21,39 +21,166 @@ const registration = async (req, res) => {
     console.log(error);
   }
 }
-const login=async(req,res)=>{
-  try{
-    const userName=req.body.username;
-    const passWord=req.body.password;
-    
 
-    let dbusername=await User.find({username:userName})
-    let dbpassword=await User.find({password:passWord})
+// user-login
 
-    if (dbusername.length > 0 && dbpassword.length > 0 && userName === dbusername[0].username && passWord === dbpassword[0].password) {
+const login = async (req, res) => {
+  try {
+    const userName = req.body.username;
+    const passWord = req.body.password;
 
-      console.log("hy");
-      const body=req.body
-      let token = jwt.sign(body, "vysh",{expiresIn: '24h'})
-      res.json({auth:true,token})
+    const user = await User.findOne({ username: userName });
+
+    if (!user) {
+      return res.status(401).json({ auth: false, message: 'Invalid username or password' });
     }
-  }catch(err){
-    console.log("error",err);
+
+    if (passWord !== user.password) {
+      return res.status(401).json({ auth: false, message: 'Invalid username or password' });
+    }
+
+    const token = jwt.sign({ username: userName }, 'vysh', { expiresIn: '24h' });
+    res.json({ auth: true, token });
+  } catch (err) {
+    console.log('error', err);
+    res.status(500).json({ error: 'Internal server error' });
   }
-}
+};
+
+
+// add product to cart by user
+
 
 const AddProductToCart=async(req,res)=>{
 
-  let id=req.params.id;
- let productid=await Product.find(id)
+  let Id=req.params.id;
+  
+  let productid=await Product.findById(Id)
+  
+  if(!productid){
+    res.send(`error while adding to cart`)
+    
+  }try{
+    
+    let authHeader=req.headers.authorization;
+    let token=authHeader.split(" ")[1]
+    let decodedTokenUsername=jwt.decode(token,"vysh")
+    
+    let user=await User.findOne({username:decodedTokenUsername.username})
+    if (user.cart.includes(Id)) {
+       
+      res.send("Product already exists in the cart");
+    }
+       else {
+      user.cart.push(productid);
+      await user.save(user);
+      res.send("Product added to cart successfully");
+      
+    }
+  }
+  catch(err){
+    console.log("error",err)
+  }
+    
 
- if(!productid){
-     res.send(`error while adding to cart`)
+}
 
- }else{
-    cart
+// get all cartitems of a specificUser by id
+
+const GetCartItems=async(req,res)=>{
+   let Id=req.params.id
+
+   try{
+    let user=await User.findById(Id)
+     if(!user){
+      res.sent("please login")
+     } 
+      res.json(user.cart)
+     
+    }
+
+  catch(err)
+  {
+    console.log("err",err);
+  }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// add product to whishlist
+
+const AddProductToWhishList=async(req,res)=>{
+
+  let Id=req.params.id;
+  
+  let productid=await Product.findById(Id)
+  
+  if(!productid){
+    res.send(`error while adding to cart`)
+    
+  }try{
+    
+    let authHeader=req.headers.authorization;
+    let token=authHeader.split(" ")[1]
+    let decodedTokenUsername=jwt.decode(token,"vysh")
+    
+    let user=await User.findOne({username:decodedTokenUsername.username})
+    if (user.whishlist.includes(Id)) {
+       
+      res.send("Product already exists in the WhishList");
+    }
+       else {
+      user.whishlist.push(productid);
+      await user.save(user);
+      res.send("Product added to WishList successfully");
+      
+    }
+  }
+  catch(err){
+    console.log("error",err)
+  }
+    
+
+}
+
+
+// get Whishlist of a specific user
+
+
+const GetWhishLIst=async(req,res)=>{
+  let Id=req.params.id
+
+  try{
+   let user=await User.findById(Id)
+    if(!user){
+     res.sent("please login")
+    } 
+     res.json(user.whishlist)
+    
+   }
+
+ catch(err)
+ {
+   console.log("err",err);
  }
 
 }
 
-module.exports = {registration,login}
+
+module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst}

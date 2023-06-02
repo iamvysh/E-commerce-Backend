@@ -11,7 +11,12 @@ const userschema = new mongoose.Schema({
   cart:[{
     type:mongoose.Schema.Types.ObjectId,
     ref:"products"
+  }],
+  whishlist:[{
+    type:mongoose.Schema.Types.ObjectId,
+    ref:"products"
   }]
+
 });
 
 let user = mongoose.model("user", userschema);
