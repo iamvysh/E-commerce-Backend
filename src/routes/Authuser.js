@@ -13,5 +13,7 @@ router.post("/users/whishlists/:id",user.AddProductToWhishList)
 router.get("/users/products",product.getAllTheProducts)
 router.get("/users/cart/:id",user.GetCartItems)
 router.get("/users/whishlists/:id",user.GetWhishLIst)
+router.delete("/users/whishlists/:id",user.deleteItemFromWhishlist)
+router.delete("/users/cart/:id",user.deleteProductFromCart)
 
 module.exports=router

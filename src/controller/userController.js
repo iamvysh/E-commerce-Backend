@@ -183,4 +183,82 @@ const GetWhishLIst=async(req,res)=>{
 }
 
 
-module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst}
+
+// delete Whishlist from  user
+
+
+
+
+const deleteItemFromWhishlist=async(req,res)=>{
+
+  const userId=req.params.id
+  const productId=req.body.id
+   
+  try{
+        let user=await User.findById(userId)
+        if(!user){
+          res.send("please register")
+        }
+        
+          const index = user.whishlist.indexOf(productId);
+          if (index === -1) {
+            return res.status(404).json({ message: "Product not found in wishlist" });
+          }
+      
+          // remove the product from the wishlist and save the updated user document
+          user.whishlist.splice(index, 1);
+          await user.save();
+          res.send("product deleted succesfully")
+      
+        
+          
+        }
+
+  catch(err){
+    console.log("error",err)
+  }
+  
+
+
+}
+
+
+// delete a procuct from cart
+
+
+
+const deleteProductFromCart=async(req,res)=>{
+  const userId=req.params.id
+  const productId=req.body.id
+   
+  try{
+    let user=await User.findById(userId)
+    if(!user){
+      res.send("please register")
+    }
+    
+      const index = user.cart.indexOf(productId);
+      if (index === -1) {
+        return res.status(404).json({ message: "Product not found in cart" });
+      }
+  
+      // remove the product from the wishlist and save the updated user document
+      user.cart.splice(index, 1);
+      await user.save();
+      res.send("product deleted succesfully")
+  
+    
+      
+    }
+
+catch(err){
+  console.log("error",err)
+
+}
+}
+
+
+
+
+
+module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst,deleteItemFromWhishlist,deleteProductFromCart}
