@@ -6,7 +6,7 @@ const router=express.Router()
 
 router.post("/users/register",user.registration)
 router.post("/users/login",user.login)
-router.get("/users/products/?category",product.getProductsByCategory)
+router.get("/users/products/category",product.getProductsByCategory)
 router.get("/users/products/:id",product.getProductById)
 router.post("/users/cart/:id",user.AddProductToCart)
 router.post("/users/whishlists/:id",user.AddProductToWhishList)

@@ -29,8 +29,9 @@ const getAllTheProducts=async(req,res)=>{
 const getProductsByCategory=async(req,res)=>{
 
     const category=req.query.category
+    console.log(category);
     try{
-        const products=await Product.find({category})
+        const products=await Product.find({category:category})
 
         if(products.length>0){
             res.send(products)
@@ -38,7 +39,7 @@ const getProductsByCategory=async(req,res)=>{
             res.send(`no products found`)
         }
     }catch(err){
-        console.log(`error`,err);
+        console.log(`error in finding products`,err);
     }
    
 
@@ -65,5 +66,42 @@ const getProductById=async(req,res)=>{
 }
 
 
+const updateProduct=async(req,res)=>{
+    const productId = req.params.id;
+  const updatedproduct = req.body;
+  console.log(productId,updatedproduct);
 
-module.exports={addProduct,getProductsByCategory,getProductById,getAllTheProducts}
+  try {
+    const product = await Product.findByIdAndUpdate(productId , updatedproduct,{ new: true });
+    // updateOne({_id:productId},{price:req.body.price})
+
+    if (product) {
+      res.status(200).json({ message: 'product updated successfully.', product });
+    } else {
+      res.status(404).json({ message: 'product not found.' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'An error occurred.', error });
+  }
+}
+
+const deleteProduct=async(req,res)=>{
+
+    const productId=req.params.id
+
+    try{
+       const product=await Product.findByIdAndDelete(productId)
+       if (product) {
+        res.status(200).json({ message: 'product deleted successfully.' });
+      } else {
+        res.status(404).json({ message: 'product not found.' });
+      }
+    }catch(error){
+        res.status(500).json({ message: 'An error occurred.', error });
+    }
+
+}
+
+
+
+module.exports={addProduct,getProductsByCategory,getProductById,getAllTheProducts,updateProduct,deleteProduct}

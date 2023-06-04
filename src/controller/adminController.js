@@ -1,5 +1,6 @@
 const Admin=require("../model/adminSchema")
 const jwt = require("jsonwebtoken");
+const Users=require("../model/userSchema")
 
 
 // register admin
@@ -48,6 +49,34 @@ const adminLogin=async(req,res)=>{
 }
 
 
+const toGetAllUsers=async(req,res)=>{
 
-  module.exports={adminRegistration,adminLogin}
+  try{
+    let users=await Users.find()
+    res.json(users)
+
+    
+
+  }catch(err){
+    console.log("error",err)
+    res.send("No Users Found")
+  }
+  
+}
+
+const toGetAUserById=async(req,res)=>{
+  userId=req.params.id
+  try{
+    let user=await Users.findById(userId)
+    res.json(user)
+
+  }catch(err){
+    console.log("error",errr)
+    res.send("no user found")
+  }
+}
+
+
+
+  module.exports={adminRegistration,adminLogin,toGetAllUsers,toGetAUserById}
   
