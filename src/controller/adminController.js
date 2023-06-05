@@ -1,7 +1,7 @@
 const Admin=require("../model/adminSchema")
 const jwt = require("jsonwebtoken");
 const Users=require("../model/userSchema")
-
+const bcrypt = require('bcrypt')
 
 // register admin
 
@@ -9,12 +9,14 @@ const adminRegistration = async (req, res) => {
     try {
       
       const userName = req.body.username;
+      const Password=req.body.password
       const findAdmin = await Admin.find({ username: userName });
       if (findAdmin.length > 0) {
         res.send("admin already Exist");
       }
+      let hashedpassword= await bcrypt.hash(Password, 10)
   
-      const newAdmin = new Admin(req.body);
+      const newAdmin = new Admin({username:req.body.username,password:hashedpassword});
       await newAdmin.save();
       
       res.json("Admin registered successfully,plsease login");
@@ -35,13 +37,27 @@ const adminLogin=async(req,res)=>{
         if (!admin) {
           return res.status(401).json({ auth: false, message: 'Invalid username or password' });
         }
+
+
+
+        // hashing the password first
+
+         let Password= await bcrypt.hash(passWord, 10)
+
+        
+
+         bcrypt.compare(Password, admin.password, (err, result) => {
+          if (err) {
+            res.status(401).json({ auth: false, message: 'Invalid  password' });
+          }
+        })
     
-        if (passWord !== admin.password) {
-          return res.status(401).json({ auth: false, message: 'Invalid username or password' });
-        }
+        // if (passWord !== admin.password) {
+        //   return res.status(401).json({ auth: false, message: 'Invalid username or password' });
+        // }
     
         const token = jwt.sign({ username: userName }, 'admin', { expiresIn: '24h' });
-        res.json({ auth: true, token });
+        res.json({ auth: true,message: "Admin logined successfully", token });
       } catch (err) {
         console.log('error', err);
         res.status(500).json({ error: 'Internal server error' });

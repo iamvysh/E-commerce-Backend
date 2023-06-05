@@ -1,15 +1,17 @@
 const jwt=require("jsonwebtoken")
 
-const authorizeUser=((req,res,next)=>{
+
+
+const authorizeAdmin=((req,res,next)=>{
 
     let authHeader=req.headers.authorization;
     if(authHeader==undefined){
         res.status(401).send("no token provided")
     }
         let token=authHeader.split(" ")[1]
-        jwt.verify(token,"vysh",(err)=>{
+        jwt.verify(token,'admin',(err)=>{
             if(err){
-                res.send("invalid user")
+                res.sent("invalid user")
             }else{
                 next()
             }
@@ -18,4 +20,4 @@ const authorizeUser=((req,res,next)=>{
 
 })
 
-module.exports=authorizeUser;
+module.exports=authorizeAdmin

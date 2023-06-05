@@ -1,6 +1,7 @@
 const User = require("../model/userSchema");
 const Product=require("../model/productSchema")
 const jwt = require("jsonwebtoken");
+const bcrypt = require('bcrypt')
 
 // user registaration
 
@@ -8,12 +9,16 @@ const registration = async (req, res) => {
   try {
     console.log(req.body, "hjikhjhhipihjip");
     const userName = req.body.username;
+    const Password=req.body.password
     const findUser = await User.find({ username: userName });
     if (findUser.length > 0) {
       res.send("user already Exist");
     }
+    let hashedpassword= await bcrypt.hash(Password, 10)
+    
 
-    const newuser = new User(req.body);
+    const newuser = new User({username:userName,password:hashedpassword});
+    console.log("helloooooooo");
     await newuser.save();
     
     res.json("User registered successfully,plsease login");
@@ -35,12 +40,22 @@ const login = async (req, res) => {
       return res.status(401).json({ auth: false, message: 'Invalid username or password' });
     }
 
-    if (passWord !== user.password) {
-      return res.status(401).json({ auth: false, message: 'Invalid username or password' });
-    }
+    // hashing the password first
 
+    let Password= await bcrypt.hash(passWord, 10)
+
+    // comparing both passwords
+
+    bcrypt.compare(Password, user.password, (err, result) => {
+      if (err) {
+        res.status(401).json({ auth: false, message: 'Invalid  password' });
+      }
+    })
+
+
+    
     const token = jwt.sign({ username: userName }, 'vysh', { expiresIn: '24h' });
-    res.json({ auth: true, token });
+    res.json({ auth: true,message: "user logined succussfully", token });
   } catch (err) {
     console.log('error', err);
     res.status(500).json({ error: 'Internal server error' });
