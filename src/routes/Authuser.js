@@ -16,5 +16,6 @@ router.get("/users/cart/:id",userToken,user.GetCartItems)
 router.get("/users/whishlists/:id",userToken,user.GetWhishLIst)
 router.delete("/users/whishlists/:id",userToken,user.deleteItemFromWhishlist)
 router.delete("/users/cart/:id",userToken,user.deleteProductFromCart)
+router.get("/users/payment/:id",user.proceedToPayment)
 
 module.exports=router

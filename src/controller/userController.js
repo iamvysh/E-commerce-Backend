@@ -121,23 +121,6 @@ const GetCartItems=async(req,res)=>{
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // add product to whishlist
 
 const AddProductToWhishList=async(req,res)=>{
@@ -273,7 +256,36 @@ catch(err){
 }
 
 
+// proceed to payment
+
+
+const proceedToPayment=async(req,res)=>{
+
+  const userId=req.params.id;
+  
+  try{
+    let user=await User.findById(userId).populate("cart")
+
+    // res.send(user.cart)
+    
+    let totalSum = user.cart.reduce((sum,item)=>{
+
+       return sum+item.price
+      
+    },0)
+    res.json(totalSum)
 
 
 
-module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst,deleteItemFromWhishlist,deleteProductFromCart}
+
+  }catch(err){
+      console.log("error",err)
+  }
+
+}
+
+
+
+
+
+module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst,deleteItemFromWhishlist,deleteProductFromCart,proceedToPayment}
