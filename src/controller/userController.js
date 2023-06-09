@@ -270,7 +270,7 @@ const proceedToPayment=async(req,res)=>{
     // res.send(user.cart)
 
     if(user.cart.length==0){
-      res.json({message:"your cart is empty"})
+      return res.json({message:"your cart is empty"})
     }
     
     let totalSum = user.cart.reduce((sum,item)=>{

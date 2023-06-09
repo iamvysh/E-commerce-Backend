@@ -124,5 +124,27 @@ const toGetStatus=async(req,res)=>{
 }
 
 
-  module.exports={adminRegistration,adminLogin,toGetAllUsers,toGetAUserById,toGetStatus}
+const orderDetails=async(req,res)=>{
+  try {
+    const orderDetail = await Users.find({}, "orders");
+
+    const validOrderDetail = orderDetail.filter((item) => {
+      return item.orders && item.orders.length > 0;
+    });
+
+    // it eliminates the oraders of null array=> if the array contains null values
+
+    if (validOrderDetail.length > 0) {
+      res.status(200).json({ orders: validOrderDetail });
+    } else {
+      res.status(404).json({ message: "No valid orders found" });
+    }
+  } catch (err) {
+    console.log("Error:", err);
+    res.status(500).send("Internal server error");
+  }
+}
+
+
+  module.exports={adminRegistration,adminLogin,toGetAllUsers,toGetAUserById,toGetStatus,orderDetails}
   
