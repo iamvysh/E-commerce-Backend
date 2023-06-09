@@ -5,8 +5,8 @@ const port = 3000
 
 var db = "mongodb://localhost:27017/example"
 var bodyParser = require('body-parser')
-app.use(bodyParser.urlencoded({ extended: false }))
-app.use(bodyParser.json()) // change to expresss
+app.use(express.urlencoded({ extended: false }))
+app.use(express.json()) // change to expresss
 
 main().catch((err) => console.log(err));
 async function main() {
@@ -24,14 +24,14 @@ async function main() {
 
 
 //  user
-const Authuser=require("./src/routes/Userroutes")
+const Authuser=require("./routes/Userroutes")
 app.use("/",Authuser)
 
 
 
 // admin
 
-const Authadmin=require("./src/routes/Adminroutes")
+const Authadmin=require("./routes/Adminroutes")
 app.use("/",Authadmin)
 
 
