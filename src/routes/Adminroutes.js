@@ -16,6 +16,7 @@ router.get("/admin/products",AdminToken,procucts.getAllTheProducts)
 router.get("/admin/products/:id",AdminToken,procucts.getProductById )
 router.put("/admin/products/:id",AdminToken,procucts.updateProduct)
 router.delete("/admin/products/:id",AdminToken,procucts.deleteProduct)
+router.get("/admin/orders/status",admin.toGetStatus)
 
 
 module.exports=router

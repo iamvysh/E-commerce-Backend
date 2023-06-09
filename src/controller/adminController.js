@@ -93,6 +93,36 @@ const toGetAUserById=async(req,res)=>{
 }
 
 
+const toGetStatus=async(req,res)=>{
+  try {
+    const aggregation = Users.aggregate([
+      {
+        $unwind: '$orders'
+      },
+      {
+        $group: {
+          _id: null,
+          totalRevenue: { $sum: '$orders.totalAmount' },
+          totalItemsSold: { $sum: { $sum: '$orders.products' } }
+        }
+      }
+    ]);
 
-  module.exports={adminRegistration,adminLogin,toGetAllUsers,toGetAUserById}
+
+    console.log(aggregation);
+  
+    const result = await aggregation.exec();
+    console.log(result);
+  
+    const totalRevenue = result[0].totalRevenue;
+    const totalItemsSold = result[0].totalItemsSold;
+    res.json({'Total Revenue:': totalRevenue,'Total Items Sold:':totalItemsSold});
+    
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+
+  module.exports={adminRegistration,adminLogin,toGetAllUsers,toGetAUserById,toGetStatus}
   

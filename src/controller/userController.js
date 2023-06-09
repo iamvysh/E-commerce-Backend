@@ -2,6 +2,7 @@ const User = require("../model/userSchema");
 const Product=require("../model/productSchema")
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt')
+const Razorpay = require("razorpay");
 
 // user registaration
 
@@ -267,13 +268,81 @@ const proceedToPayment=async(req,res)=>{
     let user=await User.findById(userId).populate("cart")
 
     // res.send(user.cart)
+
+    if(user.cart.length==0){
+      res.json({message:"your cart is empty"})
+    }
     
     let totalSum = user.cart.reduce((sum,item)=>{
 
        return sum+item.price
       
     },0)
-    res.json(totalSum)
+    console.log(totalSum)
+    let noOfProducts=user.cart.length
+
+
+    var instance = new Razorpay({
+      key_id: 'rzp_test_nFmtKWz2oRbcjq',
+      key_secret: 'Wy12mxeiE0bIXMeCKhnpRInM',
+    });
+
+    const order = await instance.orders.create({
+      amount: totalSum ,
+      currency: "INR",
+      receipt: "Receipt#1",
+    });
+
+
+
+
+
+
+
+
+
+
+
+    console.log(order)
+
+    let details=user.orders.push({
+      products: noOfProducts,
+      orderId: order.id,
+      totalAmount: totalSum,
+      
+    });
+
+
+    // const newOrder = {
+    //   products: noOfProducts,
+        
+    //   orderId: order.id,
+    //   totalAmount: totalSum,
+    // };
+
+
+    // let details=User.findByIdAndUpdate(
+    //   user._id,
+    //   { $push: { orders: newOrder } },
+    //   { new: true })
+    //    console.log(user._id);
+      
+    
+
+
+
+
+
+    console.log(details);
+
+    if (user.cart.length === 1) {
+      user.cart = [];
+    } else {
+      user.cart.splice(0, user.cart.length);
+    }
+    await user.save();
+
+    res.json({ message: "Order placed successfully" });
 
 
 
@@ -288,4 +357,4 @@ const proceedToPayment=async(req,res)=>{
 
 
 
-module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst,deleteItemFromWhishlist,deleteProductFromCart,proceedToPayment}
+module.exports = {registration,login,AddProductToCart,AddProductToWhishList,GetCartItems,GetWhishLIst,deleteItemFromWhishlist,deleteProductFromCart,proceedToPayment,proceedToPayment}

@@ -7,15 +7,19 @@ const router=express.Router()
 
 router.post("/users/register",user.registration)
 router.post("/users/login",user.login)
+
 router.get("/users/products/category",userToken,product.getProductsByCategory)
 router.get("/users/products/:id",userToken,product.getProductById)
-router.post("/users/cart/:id",userToken,user.AddProductToCart)
-router.post("/users/whishlists/:id",userToken,user.AddProductToWhishList)
 router.get("/users/products",userToken,product.getAllTheProducts)
+
+router.post("/users/cart/:id",userToken,user.AddProductToCart)
 router.get("/users/cart/:id",userToken,user.GetCartItems)
+router.delete("/users/cart/:id",userToken,user.deleteProductFromCart)
+
+router.post("/users/whishlists/:id",userToken,user.AddProductToWhishList)
 router.get("/users/whishlists/:id",userToken,user.GetWhishLIst)
 router.delete("/users/whishlists/:id",userToken,user.deleteItemFromWhishlist)
-router.delete("/users/cart/:id",userToken,user.deleteProductFromCart)
+
 router.get("/users/payment/:id",user.proceedToPayment)
 
 module.exports=router

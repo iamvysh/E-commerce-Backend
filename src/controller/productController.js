@@ -105,3 +105,8 @@ const deleteProduct=async(req,res)=>{
 
 
 module.exports={addProduct,getProductsByCategory,getProductById,getAllTheProducts,updateProduct,deleteProduct}
+
+
+
+// key id  rzp_test_nFmtKWz2oRbcjq
+// key secret    Wy12mxeiE0bIXMeCKhnpRInM
