@@ -9,7 +9,7 @@ const authorizeUser=((req,res,next)=>{
         let token=authHeader.split(" ")[1]
         jwt.verify(token,"vysh",(err)=>{
             if(err){
-                res.send("invalid user")
+                res.json( {status:"failure",message:"password or username mismatch",error_message:"password or username mismatch"});
             }else{
                 next()
             }

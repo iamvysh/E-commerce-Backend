@@ -2,37 +2,49 @@ const Admin=require("../model/adminSchema")
 const jwt = require("jsonwebtoken");
 const Users=require("../model/userSchema")
 const bcrypt = require('bcrypt')
+const validateSchema=require("../middlewares/schemaValidate")
 
 // register admin
 
 const adminRegistration = async (req, res) => {
-    try {
+    
       
-      const userName = req.body.username;
-      const Password=req.body.password
-      const findAdmin = await Admin.find({ username: userName });
+      // const userName = req.body.username;
+      // const Password=req.body.password
+      const { error, value } = validateSchema.adschema.validate(req.body);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { username, password,email } = value;
+      const findAdmin = await Admin.find({ username: username });
       if (findAdmin.length > 0) {
         res.send("admin already Exist");
       }
-      let hashedpassword= await bcrypt.hash(Password, 10)
+      let hashedpassword= await bcrypt.hash(password, 10)
   
-      const newAdmin = new Admin({username:req.body.username,password:hashedpassword});
+      const newAdmin = new Admin({username:req.body.username,password:hashedpassword,email:email});
       await newAdmin.save();
       
       res.json("Admin registered successfully,plsease login");
-    } catch (error) {
-      console.log(error);
-    }
+    
   }
 
 // login admin
 
 const adminLogin=async(req,res)=>{
-    try {
-        const userName = req.body.username;
-        const passWord = req.body.password;
+    
+        // const userName = req.body.username;
+        // const passWord = req.body.password;
+
+        const { error, value } = validateSchema.adschema.validate(req.body);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { username, password } = value;
           console.log("hu");
-        const admin = await Admin.findOne({ username: userName });
+        const admin = await Admin.findOne({ username: username });
     
         if (!admin) {
           return res.status(401).json({ auth: false, message: 'Invalid username or password' });
@@ -42,7 +54,7 @@ const adminLogin=async(req,res)=>{
 
         // hashing the password first
 
-         let Password= await bcrypt.hash(passWord, 10)
+         let Password= await bcrypt.hash(password, 10)
 
         
 
@@ -57,44 +69,39 @@ const adminLogin=async(req,res)=>{
         // }
     
         const token = jwt.sign({ username: userName }, 'admin', { expiresIn: '24h' });
-        res.json({ auth: true,message: "Admin logined successfully", token });
-      } catch (err) {
-        console.log('error', err);
-        res.status(500).json({ error: 'Internal server error' });
-      }
+        res.json({
+          status: "success",
+          message: "Admin succefully logged in ",
+          data: token,
+        });
+      
 }
 
 
 const toGetAllUsers=async(req,res)=>{
 
-  try{
+  
     let users=await Users.find()
     res.json(users)
 
     
 
-  }catch(err){
-    console.log("error",err)
-    res.send("No Users Found")
-  }
+  
   
 }
 
 const toGetAUserById=async(req,res)=>{
   userId=req.params.id
-  try{
+  
     let user=await Users.findById(userId)
     res.json(user)
 
-  }catch(err){
-    console.log("error",errr)
-    res.send("no user found")
-  }
+  
 }
 
 
 const toGetStatus=async(req,res)=>{
-  try {
+  
     const aggregation = Users.aggregate([
       {
         $unwind: '$orders'
@@ -118,14 +125,12 @@ const toGetStatus=async(req,res)=>{
     const totalItemsSold = result[0].totalItemsSold;
     res.json({'Total Revenue:': totalRevenue,'Total Items Sold:':totalItemsSold});
     
-  } catch (err) {
-    console.error(err);
-  }
+  
 }
 
 
 const orderDetails=async(req,res)=>{
-  try {
+  
     const orderDetail = await Users.find({}, "orders");
 
     const validOrderDetail = orderDetail.filter((item) => {
@@ -139,10 +144,7 @@ const orderDetails=async(req,res)=>{
     } else {
       res.status(404).json({ message: "No valid orders found" });
     }
-  } catch (err) {
-    console.log("Error:", err);
-    res.status(500).send("Internal server error");
-  }
+ 
 }
 
 

@@ -4,7 +4,7 @@ const app = express()
 const port = 3000
 
 var db = "mongodb://localhost:27017/example"
-var bodyParser = require('body-parser')
+// var bodyParser = require('body-parser')
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json()) // change to expresss
 

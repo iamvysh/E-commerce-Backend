@@ -3,39 +3,52 @@ const Product=require("../model/productSchema")
 const jwt = require("jsonwebtoken");
 const bcrypt = require('bcrypt')
 const Razorpay = require("razorpay");
+const validateSchema=require("../middlewares/schemaValidate")
 
 // user registaration
 
 const registration = async (req, res) => {
-  try {
+  
     console.log(req.body, "hjikhjhhipihjip");
-    const userName = req.body.username;
-    const Password=req.body.password
-    const findUser = await User.find({ username: userName });
+    // const userName = validateSchema.uschema.validate( req.body.username);
+    // const Password=validateSchema.uschema.validate(req.body.password);
+
+    const { error, value } = validateSchema.uschema.validate(req.body);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { username, password } = value;
+    const findUser = await User.find({ username: username });
     if (findUser.length > 0) {
       res.send("user already Exist");
     }
-    let hashedpassword= await bcrypt.hash(Password, 10)
+    let hashedpassword= await bcrypt.hash(password, 10)
     
 
-    const newuser = new User({username:userName,password:hashedpassword});
+    const newuser = new User({username:username,password:hashedpassword});
     console.log("helloooooooo");
     await newuser.save();
     
     res.json("User registered successfully,plsease login");
-  } catch (error) {
-    console.log(error);
-  }
+  
 }
 
 // user-login
 
 const login = async (req, res) => {
-  try {
-    const userName = req.body.username;
-    const passWord = req.body.password;
+  
+    // const userName = req.body.username;
+    // const passWord = req.body.password;
 
-    const user = await User.findOne({ username: userName });
+    const { error, value } = validateSchema.uschema.validate(req.body);
+    if (error) {
+      return res.status(400).send(error.details[0].message);
+    }
+
+    const { username, password } = value;
+
+    const user = await User.findOne({ username: username });
 
     if (!user) {
       return res.status(401).json({ auth: false, message: 'Invalid username or password' });
@@ -43,24 +56,25 @@ const login = async (req, res) => {
 
     // hashing the password first
 
-    let Password= await bcrypt.hash(passWord, 10)
+    let Password= await bcrypt.hash(password, 10)
 
     // comparing both passwords
 
     bcrypt.compare(Password, user.password, (err, result) => {
       if (err) {
-        res.status(401).json({ auth: false, message: 'Invalid  password' });
+        res.json( {status:"failure",message:"password or username mismatch",error_message:"password or username mismatch"});
       }
     })
 
 
     
     const token = jwt.sign({ username: userName }, 'vysh', { expiresIn: '24h' });
-    res.json({ auth: true,message: "user logined succussfully", token });
-  } catch (err) {
-    console.log('error', err);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+    res.json({
+      status: "success",
+      message: "user  succefully logged in ",
+      data: token,
+    });
+  
 };
 
 
@@ -76,7 +90,7 @@ const AddProductToCart=async(req,res)=>{
   if(!productid){
     res.send(`error while adding to cart`)
     
-  }try{
+  }
     
     let authHeader=req.headers.authorization;
     let token=authHeader.split(" ")[1]
@@ -93,11 +107,7 @@ const AddProductToCart=async(req,res)=>{
       res.send("Product added to cart successfully");
       
     }
-  }
-  catch(err){
-    console.log("error",err)
-  }
-    
+  
 
 }
 
@@ -106,19 +116,15 @@ const AddProductToCart=async(req,res)=>{
 const GetCartItems=async(req,res)=>{
    let Id=req.params.id
 
-   try{
     let user=await User.findById(Id)
      if(!user){
       res.sent("please login")
      } 
       res.json(user.cart)
      
-    }
+    
 
-  catch(err)
-  {
-    console.log("err",err);
-  }
+  
 
 }
 
@@ -133,7 +139,7 @@ const AddProductToWhishList=async(req,res)=>{
   if(!productid){
     res.send(`error while adding to cart`)
     
-  }try{
+  }
     
     let authHeader=req.headers.authorization;
     let token=authHeader.split(" ")[1]
@@ -150,10 +156,8 @@ const AddProductToWhishList=async(req,res)=>{
       res.send("Product added to WishList successfully");
       
     }
-  }
-  catch(err){
-    console.log("error",err)
-  }
+  
+  
     
 
 }
@@ -165,19 +169,16 @@ const AddProductToWhishList=async(req,res)=>{
 const GetWhishLIst=async(req,res)=>{
   let Id=req.params.id
 
-  try{
+  
    let user=await User.findById(Id)
     if(!user){
      res.sent("please login")
     } 
      res.json(user.whishlist)
     
-   }
+   
 
- catch(err)
- {
-   console.log("err",err);
- }
+ 
 
 }
 
@@ -193,7 +194,7 @@ const deleteItemFromWhishlist=async(req,res)=>{
   const userId=req.params.id
   const productId=req.body.id
    
-  try{
+  
         let user=await User.findById(userId)
         if(!user){
           res.send("please register")
@@ -211,11 +212,9 @@ const deleteItemFromWhishlist=async(req,res)=>{
       
         
           
-        }
+        
 
-  catch(err){
-    console.log("error",err)
-  }
+  
   
 
 
@@ -230,7 +229,7 @@ const deleteProductFromCart=async(req,res)=>{
   const userId=req.params.id
   const productId=req.body.id
    
-  try{
+  
     let user=await User.findById(userId)
     if(!user){
       res.send("please register")
@@ -248,12 +247,9 @@ const deleteProductFromCart=async(req,res)=>{
   
     
       
-    }
+    
 
-catch(err){
-  console.log("error",err)
 
-}
 }
 
 
@@ -264,7 +260,7 @@ const proceedToPayment=async(req,res)=>{
 
   const userId=req.params.id;
   
-  try{
+  
     let user=await User.findById(userId).populate("cart")
 
     // res.send(user.cart)
@@ -344,13 +340,10 @@ const proceedToPayment=async(req,res)=>{
 
     res.json({ message: "Order placed successfully" });
 
+ 
 
 
-
-  }catch(err){
-      console.log("error",err)
-  }
-
+  
 }
 
 
