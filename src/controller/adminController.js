@@ -13,20 +13,26 @@ const adminRegistration = async (req, res) => {
       // const Password=req.body.password
       const { error, value } = validateSchema.adschema.validate(req.body);
     if (error) {
-      return res.status(400).send(error.details[0].message);
+      return res.status(400).json({message:error.details[0].message});
     }
 
     const { username, password,email } = value;
       const findAdmin = await Admin.find({ username: username });
       if (findAdmin.length > 0) {
-        res.send("admin already Exist");
+        // res.send("admin already Exist");
+        json({ status:"failure", message: 'admin already Exist' })
       }
       let hashedpassword= await bcrypt.hash(password, 10)
   
-      const newAdmin = new Admin({username:req.body.username,password:hashedpassword,email:email});
+      const newAdmin = new Admin({username:username,password:hashedpassword,email:email});
       await newAdmin.save();
       
-      res.json("Admin registered successfully,plsease login");
+      // res.json("Admin registered successfully,plsease login");
+      res.json({
+        status: "success",
+        message: "Admin registered successfully,plsease login"
+        
+      })
     
   }
 
@@ -39,7 +45,7 @@ const adminLogin=async(req,res)=>{
 
         const { error, value } = validateSchema.adschema.validate(req.body);
     if (error) {
-      return res.status(400).send(error.details[0].message);
+      return res.status(400).json({message:error.details[0].message});
     }
 
     const { username, password } = value;
@@ -68,7 +74,7 @@ const adminLogin=async(req,res)=>{
         //   return res.status(401).json({ auth: false, message: 'Invalid username or password' });
         // }
     
-        const token = jwt.sign({ username: userName }, 'admin', { expiresIn: '24h' });
+        const token = jwt.sign({ username: username }, 'admin', { expiresIn: '24h' });
         res.json({
           status: "success",
           message: "Admin succefully logged in ",
@@ -82,7 +88,13 @@ const toGetAllUsers=async(req,res)=>{
 
   
     let users=await Users.find()
-    res.json(users)
+    // res.json(users)
+    res.json({
+      status: "success",
+      message: "list of users ",
+      data: users,
+    });
+  
 
     
 
@@ -94,7 +106,22 @@ const toGetAUserById=async(req,res)=>{
   userId=req.params.id
   
     let user=await Users.findById(userId)
-    res.json(user)
+
+
+    if(!user){
+      // res.sent("please login")
+     return res.json({
+        status: "failure",
+        message: "userID is incorrect"
+        
+      })
+     } 
+    // res.json(user)
+    res.json({
+      status: "success",
+      message: "user datails",
+      data: user,
+    });
 
   
 }
@@ -123,7 +150,7 @@ const toGetStatus=async(req,res)=>{
   
     const totalRevenue = result[0].totalRevenue;
     const totalItemsSold = result[0].totalItemsSold;
-    res.json({'Total Revenue:': totalRevenue,'Total Items Sold:':totalItemsSold});
+    res.json({status:"success",'Total Revenue:': totalRevenue,'Total Items Sold:':totalItemsSold});
     
   
 }
@@ -140,9 +167,9 @@ const orderDetails=async(req,res)=>{
     // it eliminates the oraders of null array=> if the array contains null values
 
     if (validOrderDetail.length > 0) {
-      res.status(200).json({ orders: validOrderDetail });
+      res.status(200).json({ status:"succes",orders: validOrderDetail });
     } else {
-      res.status(404).json({ message: "No valid orders found" });
+      res.status(404).json({ status:"failure",message: "No valid orders found" });
     }
  
 }

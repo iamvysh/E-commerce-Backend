@@ -6,7 +6,13 @@ const addProduct=async(req,res)=>{
 
     
         item =await product.save()
-         res.json(item)
+        //  res.json(item)
+        res.json({
+          status: "success",
+          
+          data: item,
+        });
+      
 
 
 }
@@ -16,7 +22,12 @@ const getAllTheProducts=async(req,res)=>{
     
         console.log("hello");
         const products=await Product.find()
-        res.json(products)
+        // res.json(products)
+        res.json({
+          status: "success",
+          
+          data: products,
+        });
         
     
 }
@@ -29,9 +40,20 @@ const getProductsByCategory=async(req,res)=>{
         const products=await Product.find({category:category})
 
         if(products.length>0){
-            res.send(products)
+            // res.send(products)
+            res.json({
+              status: "success",
+              
+              data: products,
+            });
         }else{
-            res.send(`no products found`)
+            // res.send(`no products found`)
+            res.json({
+              status: "failure",
+              message:"no products found in this category"
+              
+             
+            });
         }
     
    
@@ -45,9 +67,13 @@ const getProductById=async(req,res)=>{
         const product=await Product.findById(Id)
 
         if(product){
-            res.status(200).send(product)
+            res.status(200).json({
+              status: "success",
+              
+              data: product,
+            });
         }else{
-            res.json({status:failed,message:"please enter a valid id"})
+            res.json({status:failure,message:"please enter a valid id"})
         }
     
 
@@ -66,9 +92,9 @@ const updateProduct=async(req,res)=>{
     // updateOne({_id:productId},{price:req.body.price})
 
     if (product) {
-      res.status(200).json({ message: 'product updated successfully.', product });
+      res.status(200).json({status:success, message: 'product updated successfully.',data: product });
     } else {
-      res.status(404).json({ message: 'product not found.' });
+      res.status(404).json({status:failure, message: 'product not found.' });
     }
  
 }
@@ -80,9 +106,9 @@ const deleteProduct=async(req,res)=>{
     
        const product=await Product.findByIdAndDelete(productId)
        if (product) {
-        res.status(200).json({ message: 'product deleted successfully.' });
+        res.status(200).json({status:success, message: 'product deleted successfully.' });
       } else {
-        res.status(404).json({ message: 'product not found.' });
+        res.status(404).json({status:failure, message: 'product not found.' });
       }
     
 

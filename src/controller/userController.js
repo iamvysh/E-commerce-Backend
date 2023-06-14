@@ -9,19 +9,20 @@ const validateSchema=require("../middlewares/schemaValidate")
 
 const registration = async (req, res) => {
   
-    console.log(req.body, "hjikhjhhipihjip");
+    
     // const userName = validateSchema.uschema.validate( req.body.username);
     // const Password=validateSchema.uschema.validate(req.body.password);
 
     const { error, value } = validateSchema.uschema.validate(req.body);
     if (error) {
-      return res.status(400).send(error.details[0].message);
+      return res.status(400).json({message:error.details[0].message});
     }
 
     const { username, password } = value;
     const findUser = await User.find({ username: username });
     if (findUser.length > 0) {
-      res.send("user already Exist");
+      // res.send("user already Exist");
+      return res.status(401).json({ status: false, message: 'user already Exist' });
     }
     let hashedpassword= await bcrypt.hash(password, 10)
     
@@ -30,7 +31,12 @@ const registration = async (req, res) => {
     console.log("helloooooooo");
     await newuser.save();
     
-    res.json("User registered successfully,plsease login");
+    // res.json("User registered successfully,plsease login");
+    res.json({
+      status: "success",
+      message: "User registered successfully,plsease login"
+      
+    })
   
 }
 
@@ -43,7 +49,7 @@ const login = async (req, res) => {
 
     const { error, value } = validateSchema.uschema.validate(req.body);
     if (error) {
-      return res.status(400).send(error.details[0].message);
+      return res.status(400).json({message:error.details[0].message});
     }
 
     const { username, password } = value;
@@ -68,7 +74,7 @@ const login = async (req, res) => {
 
 
     
-    const token = jwt.sign({ username: userName }, 'vysh', { expiresIn: '24h' });
+    const token = jwt.sign({ username: username }, 'vysh', { expiresIn: '24h' });
     res.json({
       status: "success",
       message: "user  succefully logged in ",
@@ -88,7 +94,12 @@ const AddProductToCart=async(req,res)=>{
   let productid=await Product.findById(Id)
   
   if(!productid){
-    res.send(`error while adding to cart`)
+    // res.send(`error while adding to cart`)
+      return res.json({
+      status: "failure",
+      message: "enter a valid product "
+      
+    })
     
   }
     
@@ -99,12 +110,23 @@ const AddProductToCart=async(req,res)=>{
     let user=await User.findOne({username:decodedTokenUsername.username})
     if (user.cart.includes(Id)) {
        
-      res.send("Product already exists in the cart");
+      // res.send("Product already exists in the cart");
+      res.json({
+        status: "failure",
+        message: "Product already exists in the cart"
+        
+      })
+      
     }
        else {
       user.cart.push(productid);
       await user.save(user);
-      res.send("Product added to cart successfully");
+      // res.send("Product added to cart successfully");
+      res.json({
+        status: "success",
+        message: "Product added to cart successfully"
+        
+      })
       
     }
   
@@ -118,10 +140,20 @@ const GetCartItems=async(req,res)=>{
 
     let user=await User.findById(Id)
      if(!user){
-      res.sent("please login")
+      // res.sent("please login")
+       return res.json({
+        status: "failure",
+        message: "please register"
+        
+      })
      } 
-      res.json(user.cart)
-     
+      // res.json(user.cart)
+      res.json({
+        status: "success",
+        message: "user  succefully logged in ",
+        data: user.cart,
+      });
+    
     
 
   
@@ -137,7 +169,12 @@ const AddProductToWhishList=async(req,res)=>{
   let productid=await Product.findById(Id)
   
   if(!productid){
-    res.send(`error while adding to cart`)
+    // res.send(`error while adding to cart`)
+    res.json({
+      status: "failure",
+      message: "product not found "
+      
+    })
     
   }
     
@@ -148,12 +185,22 @@ const AddProductToWhishList=async(req,res)=>{
     let user=await User.findOne({username:decodedTokenUsername.username})
     if (user.whishlist.includes(Id)) {
        
-      res.send("Product already exists in the WhishList");
+      // res.send("Product already exists in the WhishList");
+      res.json({
+        status: "failure",
+        message: "Product already exists in the WhishList"
+        
+      })
     }
        else {
       user.whishlist.push(productid);
       await user.save(user);
-      res.send("Product added to WishList successfully");
+      // res.send("Product added to WishList successfully");
+      res.json({
+        status: "success",
+        message: "Product added to wishlist successfully"
+        
+      })
       
     }
   
@@ -172,10 +219,21 @@ const GetWhishLIst=async(req,res)=>{
   
    let user=await User.findById(Id)
     if(!user){
-     res.sent("please login")
+    //  res.sent("please login")
+      return   res.json({
+      status: "failure",
+      message: "please login"
+      
+    })
     } 
-     res.json(user.whishlist)
+    //  res.json(user.whishlist)
+    res.json({
+      status: "success",
+      
     
+      data: user.whishlist,
+    });
+  
    
 
  
@@ -197,7 +255,14 @@ const deleteItemFromWhishlist=async(req,res)=>{
   
         let user=await User.findById(userId)
         if(!user){
-          res.send("please register")
+          // res.send("please register")
+          return   res.json({
+            status: "failure",
+            message: "please login"
+            
+          })
+          
+          
         }
         
           const index = user.whishlist.indexOf(productId);
@@ -208,7 +273,12 @@ const deleteItemFromWhishlist=async(req,res)=>{
           // remove the product from the wishlist and save the updated user document
           user.whishlist.splice(index, 1);
           await user.save();
-          res.send("product deleted succesfully")
+          // res.send("product deleted succesfully")
+          res.json({
+            status: "success",
+            message: "product deleted succesfully"
+            
+          })
       
         
           
@@ -232,7 +302,12 @@ const deleteProductFromCart=async(req,res)=>{
   
     let user=await User.findById(userId)
     if(!user){
-      res.send("please register")
+      // res.send("please register")
+      return   res.json({
+        status: "failure",
+        message: "please login"
+        
+      })
     }
     
       const index = user.cart.indexOf(productId);
@@ -243,7 +318,12 @@ const deleteProductFromCart=async(req,res)=>{
       // remove the product from the wishlist and save the updated user document
       user.cart.splice(index, 1);
       await user.save();
-      res.send("product deleted succesfully")
+      // res.send("product deleted succesfully")
+      res.json({
+        status: "success",
+        message: "product deleted succesfully"
+        
+      })
   
     
       
@@ -262,6 +342,16 @@ const proceedToPayment=async(req,res)=>{
   
   
     let user=await User.findById(userId).populate("cart")
+
+
+    if(!user){
+      // res.send("please register")
+      return   res.json({
+        status: "failure",
+        message: "please login"
+        
+      })
+    }
 
     // res.send(user.cart)
 
@@ -338,7 +428,7 @@ const proceedToPayment=async(req,res)=>{
     }
     await user.save();
 
-    res.json({ message: "Order placed successfully" });
+    res.json({status:"success", message: "Order placed successfully" });
 
  
 
