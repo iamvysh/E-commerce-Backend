@@ -164,7 +164,7 @@ const orderDetails=async(req,res)=>{
       return item.orders && item.orders.length > 0;
     });
 
-    // it eliminates the oraders of null array=> if the array contains null values
+    // it eliminates the oraders of null array=> if the array contains null valuess
 
     if (validOrderDetail.length > 0) {
       res.status(200).json({ status:"succes",orders: validOrderDetail });
